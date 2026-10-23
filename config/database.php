@@ -18,10 +18,10 @@ if (!file_exists(__DIR__ . '/installed.lock') && file_exists(__DIR__ . '/../inst
 }
 
 // Konfigurasi Database PDO
-$db_host = 'localhost';
-$db_name = 'kantin_db';
-$db_user = 'root';
-$db_pass = '(*guitar#)';
+$db_host = '';
+$db_name = '';
+$db_user = '';
+$db_pass = '';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$db_host;dbname=$db_name;charset=$charset";
