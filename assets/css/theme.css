@@ -1,0 +1,319 @@
+/* ===================================================
+   SISTEM TEMA KANTIN POS (CSS VARIABLES)
+   =================================================== */
+
+/* Theme Default: Biru Muda (Soft Blue) */
+:root, [data-theme="biru-muda"] {
+    --primary-color: #0ea5e9;
+    --primary-hover: #0284c7;
+    --sidebar-bg: #e0f2fe;
+    --sidebar-text: #0369a1;
+    --sidebar-hover: #bae6fd;
+    --sidebar-active: #0ea5e9;
+    --sidebar-active-text: #ffffff;
+    --body-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --product-card-bg: #f0f9ff;
+    --text-color: #334155;
+    --border-color: #e2e8f0;
+}
+
+/* Theme 2: Pink / Rose */
+[data-theme="pink"] {
+    --primary-color: #ec4899;
+    --primary-hover: #db2777;
+    --sidebar-bg: #fce7f3;
+    --sidebar-text: #be185d;
+    --sidebar-hover: #fbcfe8;
+    --sidebar-active: #ec4899;
+    --sidebar-active-text: #ffffff;
+    --body-bg: #fff5f7;
+    --card-bg: #ffffff;
+    --product-card-bg: #fff1f4;
+    --text-color: #334155;
+    --border-color: #fbcfe8;
+}
+
+/* Theme 3: Ungu Muda (Lavender) */
+[data-theme="ungu-muda"] {
+    --primary-color: #8b5cf6;
+    --primary-hover: #7c3aed;
+    --sidebar-bg: #f3e8ff;
+    --sidebar-text: #6b21a8;
+    --sidebar-hover: #e9d5ff;
+    --sidebar-active: #8b5cf6;
+    --sidebar-active-text: #ffffff;
+    --body-bg: #faf5ff;
+    --card-bg: #ffffff;
+    --product-card-bg: #f5f3ff;
+    --text-color: #334155;
+    --border-color: #e9d5ff;
+}
+
+/* Theme 4: Hijau (Emerald) */
+[data-theme="hijau"] {
+    --primary-color: #10b981;
+    --primary-hover: #059669;
+    --sidebar-bg: #d1fae5;
+    --sidebar-text: #065f46;
+    --sidebar-hover: #a7f3d0;
+    --sidebar-active: #10b981;
+    --sidebar-active-text: #ffffff;
+    --body-bg: #f0fdf4;
+    --card-bg: #ffffff;
+    --product-card-bg: #ecfdf5;
+    --text-color: #334155;
+    --border-color: #a7f3d0;
+}
+
+/* Theme 5: Orange (Warm Amber) */
+[data-theme="orange"] {
+    --primary-color: #f97316;
+    --primary-hover: #ea580c;
+    --sidebar-bg: #ffedd5;
+    --sidebar-text: #9a3412;
+    --sidebar-hover: #fed7aa;
+    --sidebar-active: #f97316;
+    --sidebar-active-text: #ffffff;
+    --body-bg: #fff7ed;
+    --card-bg: #ffffff;
+    --product-card-bg: #fffaf0;
+    --text-color: #334155;
+    --border-color: #fed7aa;
+}
+
+/* Theme 6: Dark Mode */
+[data-theme="dark"] {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --sidebar-bg: #1e293b;
+    --sidebar-text: #cbd5e1;
+    --sidebar-hover: #334155;
+    --sidebar-active: #3b82f6;
+    --sidebar-active-text: #ffffff;
+    --body-bg: #0f172a;
+    --card-bg: #1e293b;
+    --product-card-bg: #090d16;
+    --text-color: #f1f5f9;
+    --border-color: #334155;
+}
+
+[data-theme="dark"] .text-muted {
+    color: #94a3b8 !important; /* Mengubah warna teks muted menjadi abu-abu terang yang kontras di mode gelap */
+}
+
+/* ===================================================
+   PENERAPAN VARIABEL CSS KE ELEMEN TAMPILAN
+   =================================================== */
+
+body {
+    background-color: var(--body-bg) !important;
+    color: var(--text-color) !important;
+    transition: all 0.3s ease;
+}
+
+.card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Pastikan konten di sebelah kanan otomatis menyesuaikan sisa layar */
+.flex-fill {
+    min-width: 0; /* Mencegah elemen flex meluber ke samping */
+}
+
+/* Pengaturan Lebar Sidebar yang Ringkas & Padat */
+.sidebar {
+    width: 230px;
+    min-width: 230px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.sidebar-title {
+    color: var(--sidebar-text) !important;
+}
+
+.sidebar a {
+    color: var(--sidebar-text) !important;
+    text-decoration: none;
+    padding: 12px 20px;
+    display: block;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar a:hover {
+    background-color: var(--sidebar-hover) !important;
+}
+
+.sidebar a.active {
+    background-color: var(--sidebar-active) !important;
+    color: var(--sidebar-active-text) !important;
+}
+
+/* Tombol Primary override Bootstrap */
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+}
+
+/* ===================================================
+   PENESUAIAN WARNA ELEMEN DENGAN TEMA DINAMIS
+   =================================================== */
+
+/* 1. Ubah warna ikon utama & teks primary agar selalu ikuti tema */
+.text-primary, 
+.text-primary-theme {
+    color: var(--primary-color) !important;
+}
+
+/* 2. Ubah warna Switch / Toggle (Lacak Stok) saat Aktif */
+.form-check-input:checked {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* 3. Tombol Outline Tema (Saran Harga Jual) */
+.btn-outline-theme {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    background-color: transparent;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-theme:hover {
+    background-color: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+/* 4. Focus Ring untuk Input, Select, & Switch Form */
+.form-control:focus, 
+.form-select:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+}
+
+.form-check-input:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+}
+
+.pagination .page-link {
+    color: var(--primary-color) !important;
+    border-color: var(--border-color) !important;
+    background-color: var(--card-bg) !important;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--sidebar-hover) !important;
+    color: var(--primary-hover) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d !important;
+    opacity: 0.5;
+    background-color: var(--card-bg) !important;
+}
+
+.btn-shortcut {
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    background-color: transparent !important;
+    transition: all 0.2s ease;
+}
+.btn-shortcut:hover {
+    background-color: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+.btn-shortcut.active-shortcut {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+@media (max-width: 991.98px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 280px;
+        height: 100vh;
+        z-index: 1050;
+        transition: left 0.3s ease-in-out;
+        background-color: var(--card-bg, #fff);
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .sidebar.show {
+        left: 0;
+    }
+    .sidebar-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.4);
+        z-index: 1040;
+        display: none;
+    }
+    .sidebar-backdrop.show {
+        display: block;
+    }
+}
+.menu-category {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6c757d;
+    margin: 15px 0 5px 10px;
+    font-weight: bold;
+}
+.transition-hover {
+    transition: all 0.2s ease-in-out;
+}
+.transition-hover:hover {
+    background-color: #e9ecef !important;
+    transform: translateY(-1px);
+}
+
+/* Transisi halus dan efek interaktif yang selaras dengan tema aktif */
+.transition-all {
+    transition: all 0.25s ease-in-out;
+}
+.hover-scale-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Untuk browser berbasis Webkit (Chrome, Safari, Edge, Opera) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+
+/* Untuk browser Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}

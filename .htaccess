@@ -1,0 +1,19 @@
+Options -Indexes
+
+RewriteEngine On
+RewriteBase /kantin/
+
+DirectoryIndex index.php
+
+RewriteRule ^logout/?$ controllers/UserController.php?action=logout [L]
+
+RewriteCond %{DOCUMENT_ROOT}/kantin/pages/login.php -f
+RewriteRule ^login/?$ pages/login.php [L,QSA]
+
+RewriteCond %{DOCUMENT_ROOT}/kantin/login.php -f
+RewriteRule ^login/?$ login.php [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/kantin/pages/$1.php -f
+RewriteRule ^([a-zA-Z0-9_-]+)/?$ pages/$1.php [L,QSA]
