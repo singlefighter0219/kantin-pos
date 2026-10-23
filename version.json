@@ -2,5 +2,5 @@
     "version": "1.0.1",
     "release_date": "2026-10-23",
     "download_url": "https://github.com/singlefighter0219/kantin-pos.git/archive/refs/heads/main.zip",
-    "changelog": "Pembaruan sistem vendor, penambahan fitur keamanan RBAC, dan perbaikan bug minor."
+    "changelog": "Perbaikan bug minor."
 }

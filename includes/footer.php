@@ -17,6 +17,7 @@
 <script src="<?= BASE_URL ?>assets/js/all.min.js"></script>
 <script src="<?= BASE_URL ?>assets/js/chart.umd.js"></script>
 <script src="<?= BASE_URL ?>assets/js/script.js"></script>
+<script src="<?= BASE_URL ?>assets/js/updater.js"></script>
 
 <?php
 // Deteksi nama file halaman yang sedang aktif saat ini

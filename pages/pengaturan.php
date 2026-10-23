@@ -192,6 +192,59 @@ $settings = $settingController->getAllSettings();
             </form>
         </div>
 
+        <!-- FORM 5: Pembaruan Sistem (In-App Updater) -->
+        <div class="col-xl-12">
+            <div class="card border-0 shadow-sm rounded-3" style="background-color: var(--card-bg);">
+                <div class="card-header bg-transparent border-bottom px-4 py-3">
+                    <h5 class="fw-bold m-0 text-primary fs-6">
+                        <i class="fa-solid fa-sync-alt me-2"></i> 5. Pembaruan Sistem (In-App Updater)
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Alert Imbauan Instalasi Awal -->
+                    <div class="alert alert-info border-0 shadow-sm rounded-3 mb-4 p-3 d-flex align-items-start gap-3">
+                        <i class="fa-solid fa-circle-info fs-4 text-info mt-1"></i>
+                        <div>
+                            <strong class="d-block text-dark mb-1">Petunjuk Penggunaan Awal:</strong>
+                            <span class="small text-muted">
+                                Setelah proses instalasi aplikasi pertama kali selesai, sangat disarankan untuk langsung melakukan penekanan tombol <strong>Cek Pembaruan</strong>. Hal ini bertujuan untuk memastikan sistem Anda telah tersinkronisasi secara penuh dengan versi server mutakhir, termasuk kelengkapan modul terbaru, peningkatan performa, serta patch keamanan.
+                            </span>
+                        </div>
+                    </div>
+
+                    <p class="mb-2">
+                        Versi Terpasang Saat Ini: 
+                        <strong id="current-version" data-version="<?= htmlspecialchars($settings['app_version'] ?? '1.0.0') ?>">
+                            v<?= htmlspecialchars($settings['app_version'] ?? '1.0.0') ?>
+                        </strong>
+                    </p>
+                    <button id="btn-check-update" class="btn btn-outline-theme btn-sm rounded-pill px-4 fw-bold" onclick="checkUpdate()">
+                        <i class="fa-solid fa-search me-1"></i> Cek Pembaruan
+                    </button>
+
+                    <div id="update-container" class="mt-4" style="display: none;">
+                        <div id="update-info-alert" class="alert alert-info">
+                            <h6 class="alert-heading fw-bold">Versi Baru Tersedia! (<span id="new-version-number"></span>)</h6>
+                            <p id="changelog-text" class="mb-2 small"></p>
+                            <button id="btn-start-update" class="btn btn-success btn-sm rounded-pill px-4 fw-bold" onclick="startDownloadUpdate()">
+                                <i class="fa-solid fa-download me-1"></i> Perbarui Sekarang
+                            </button>
+                        </div>
+
+                        <!-- Indikator Progress Download -->
+                        <div id="progress-wrapper" style="display: none;" class="mt-3">
+                            <label class="form-label small fw-bold mb-1">Mengunduh Pembaruan...</label>
+                            <div class="progress" style="height: 22px;">
+                                <div id="update-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                     role="progressbar" style="width: 0%;">0%</div>
+                            </div>
+                            <small id="update-status-text" class="text-muted d-block mt-2">Menghubungkan ke GitHub...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 

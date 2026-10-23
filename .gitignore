@@ -1,0 +1,4 @@
+/config/database.php
+/config/installed.lock
+/assets/uploads/*
+!/assets/uploads/.gitkeep

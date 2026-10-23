@@ -151,7 +151,8 @@ INSERT INTO `pengaturan` (`param_key`, `param_value`) VALUES
 ('prefix_retur', 'RETUR-'),
 ('pesan_nota', 'Terima kasih atas kunjungan Anda! Barang yang sudah dibeli tidak dapat ditukar kembali.'),
 ('favico', ''),
-('logo', '')
+('logo', ''),
+('app_version', '1.0.0')
 ON DUPLICATE KEY UPDATE `param_key` = VALUES(`param_key`);
 
 CREATE TABLE IF NOT EXISTS `users` (
