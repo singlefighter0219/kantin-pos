@@ -60,9 +60,26 @@ if ($action === 'download_and_extract') {
     $res = $zip->open($tmpZipPath);
     
     if ($res === TRUE) {
-        // Ekstrak langsung menimpa direktori proyek lokal
-        $zip->extractTo(__DIR__ . '/');
+        $extractPath = __DIR__ . '/';
+        $zip->extractTo($extractPath);
         $zip->close();
+        
+        // Cek apakah ada folder pembungkus (misal: kantin-pos-main) hasil ekstrak ZIP GitHub
+        // Kita bisa memindahkan isi file di dalam folder pembungkus tersebut ke direktori utama
+        $possibleFolder = $extractPath . 'kantin-pos-main/';
+        if (is_dir($possibleFolder)) {
+            $files = scandir($possibleFolder);
+            foreach ($files as $file) {
+                if ($file !== '.' && $file !== '..') {
+                    // Pindahkan file/folder keluar, kecuali config database lokal agar aman
+                    if ($file !== 'config') { 
+                        @rename($possibleFolder . $file, $extractPath . $file);
+                    }
+                }
+            }
+            // Hapus folder pembungkus yang sekarang sudah kosong
+            @rmdir($possibleFolder);
+        }
         
         // Hapus file ZIP sementara setelah selesai
         @unlink($tmpZipPath);
@@ -74,7 +91,6 @@ if ($action === 'download_and_extract') {
         echo json_encode(['status' => 'success', 'message' => 'Aplikasi berhasil diperbarui ke versi ' . $newVersion]);
     } else {
         if (file_exists($tmpZipPath)) @unlink($tmpZipPath);
-        
         echo json_encode([
             'status' => 'error', 
             'message' => 'Gagal membuka file ZIP pembaruan. Kode error: ' . $res
