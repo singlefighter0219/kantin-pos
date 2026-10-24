@@ -2,6 +2,20 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/guard.php';
 
+if (!function_exists('canAccess')) {
+    function canAccess($pageKey) {
+        global $accessControlList;
+        $currentRole = $_SESSION['role'] ?? 'guest';
+        
+        // Jika halaman tidak terdaftar di ACL, anggap boleh diakses (seperti Dashboard)
+        if (!isset($accessControlList[$pageKey])) {
+            return true;
+        }
+        
+        return in_array($currentRole, $accessControlList[$pageKey]);
+    }
+}
+
 // Pastikan hanya Admin yang bisa mengakses aksi update ini
 if (!canAccess('admin')) {
     echo json_encode(['status' => 'error', 'message' => 'Akses ditolak.']);
@@ -43,13 +57,15 @@ if ($action === 'download_and_extract') {
 
     // 2. Ekstrak ZIP menggunakan ZipArchive
     $zip = new ZipArchive();
-    if ($zip->open($tmpZipPath) === TRUE) {
+    $res = $zip->open($tmpZipPath);
+    
+    if ($res === TRUE) {
         // Ekstrak langsung menimpa direktori proyek lokal
-        $zip->extractTo(__DIR__);
+        $zip->extractTo(__DIR__ . '/');
         $zip->close();
         
         // Hapus file ZIP sementara setelah selesai
-        unlink($tmpZipPath);
+        @unlink($tmpZipPath);
 
         // 3. Perbarui Versi Aplikasi di Database Lokal Klien
         $stmt = $pdo->prepare("UPDATE pengaturan SET param_value = ? WHERE param_key = 'app_version'");
@@ -57,8 +73,12 @@ if ($action === 'download_and_extract') {
 
         echo json_encode(['status' => 'success', 'message' => 'Aplikasi berhasil diperbarui ke versi ' . $newVersion]);
     } else {
-        if (file_exists($tmpZipPath)) unlink($tmpZipPath);
-        echo json_encode(['status' => 'error', 'message' => 'Gagal membuka file ZIP pembaruan.']);
+        if (file_exists($tmpZipPath)) @unlink($tmpZipPath);
+        
+        echo json_encode([
+            'status' => 'error', 
+            'message' => 'Gagal membuka file ZIP pembaruan. Kode error: ' . $res
+        ]);
     }
     exit;
 }
