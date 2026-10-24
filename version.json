@@ -1,6 +1,6 @@
 {
-    "version": "1.0.1",
-    "release_date": "2026-10-23",
+    "version": "1.0.2",
+    "release_date": "2026-10-24",
     "download_url": "https://github.com/singlefighter0219/kantin-pos/archive/refs/heads/main.zip",
-    "changelog": "Perbaikan bug minor."
+    "changelog": "Perbaikan bug minor proses update."
 }
