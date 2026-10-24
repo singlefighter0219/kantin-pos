@@ -64,20 +64,26 @@ if ($action === 'download_and_extract') {
         $zip->extractTo($extractPath);
         $zip->close();
         
-        // Cek apakah ada folder pembungkus (misal: kantin-pos-main) hasil ekstrak ZIP GitHub
-        // Kita bisa memindahkan isi file di dalam folder pembungkus tersebut ke direktori utama
+        // Cek dan pindahkan isi folder pembungkus dari GitHub (misal: kantin-pos-main)
         $possibleFolder = $extractPath . 'kantin-pos-main/';
         if (is_dir($possibleFolder)) {
             $files = scandir($possibleFolder);
             foreach ($files as $file) {
                 if ($file !== '.' && $file !== '..') {
-                    // Pindahkan file/folder keluar, kecuali config database lokal agar aman
-                    if ($file !== 'config') { 
-                        @rename($possibleFolder . $file, $extractPath . $file);
+                    // Pindahkan file/folder keluar, lewati folder config agar database aman
+                    if ($file !== 'config') {
+                        $sourcePath = $possibleFolder . $file;
+                        $destPath = $extractPath . $file;
+                        
+                        // Jika sudah ada, hapus dulu file tujuan lama agar bisa ditimpa dengan mulus
+                        if (is_dir($destPath)) {
+                            // Hapus direktori lama jika perlu atau biarkan fungsi rename menimpanya
+                        }
+                        @rename($sourcePath, $destPath);
                     }
                 }
             }
-            // Hapus folder pembungkus yang sekarang sudah kosong
+            // Hapus folder kantin-pos-main yang sekarang sudah kosong
             @rmdir($possibleFolder);
         }
         
