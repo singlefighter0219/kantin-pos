@@ -61,33 +61,67 @@ if ($action === 'download_and_extract') {
     
     if ($res === TRUE) {
         $extractPath = __DIR__ . '/';
-        $zip->extractTo($extractPath);
-        $zip->close();
         
-        // Cek dan pindahkan isi folder pembungkus dari GitHub (misal: kantin-pos-main)
-        $possibleFolder = $extractPath . 'kantin-pos-main/';
-        if (is_dir($possibleFolder)) {
-            $files = scandir($possibleFolder);
-            foreach ($files as $file) {
-                if ($file !== '.' && $file !== '..') {
-                    // Pindahkan file/folder keluar, lewati folder config agar database aman
-                    if ($file !== 'config') {
-                        $sourcePath = $possibleFolder . $file;
-                        $destPath = $extractPath . $file;
-                        
-                        // Jika sudah ada, hapus dulu file tujuan lama agar bisa ditimpa dengan mulus
-                        if (is_dir($destPath)) {
-                            // Hapus direktori lama jika perlu atau biarkan fungsi rename menimpanya
-                        }
-                        @rename($sourcePath, $destPath);
-                    }
-                }
-            }
-            // Hapus folder kantin-pos-main yang sekarang sudah kosong
-            @rmdir($possibleFolder);
+        // Ekstrak ke dalam folder temporary khusus agar tidak mengotori root folder
+        $tempExtractDir = __DIR__ . '/temp_extracted_folder/';
+        if (!is_dir($tempExtractDir)) {
+            mkdir($tempExtractDir, 0777, true);
         }
         
-        // Hapus file ZIP sementara setelah selesai
+        $zip->extractTo($tempExtractDir);
+        $zip->close();
+        
+        // Cari folder pembungkus di dalam temp (misal: kantin-pos-main)
+        $subFolders = scandir($tempExtractDir);
+        $sourceDir = '';
+        foreach ($subFolders as $sub) {
+            if ($sub !== '.' && $sub !== '..' && is_dir($tempExtractDir . $sub)) {
+                $sourceDir = $tempExtractDir . $sub . '/';
+                break;
+            }
+        }
+        
+        // Jika folder pembungkus ditemukan, salin isinya ke root folder utama
+        if ($sourceDir && is_dir($sourceDir)) {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($sourceDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+            
+            foreach ($iterator as $item) {
+                $subPath = substr($item->getPathname(), strlen($sourceDir));
+                $targetPath = $extractPath . $subPath;
+                
+                // Lewati folder config agar database lokal klien aman tidak tertimpa
+                if (strpos($subPath, 'config') === 0) {
+                    continue;
+                }
+                
+                if ($item->isDir()) {
+                    if (!is_dir($targetPath)) {
+                        mkdir($targetPath, 0777, true);
+                    }
+                } else {
+                    copy($item->getPathname(), $targetPath);
+                }
+            }
+        }
+        
+        // Fungsi helper untuk menghapus folder temporary secara total
+        function deleteDir($dir) {
+            if (!file_exists($dir)) return;
+            $files = array_diff(scandir($dir), ['.', '..']);
+            foreach ($files as $file) {
+                $path = $dir . '/' . $file;
+                is_dir($path) ? deleteDir($path) : unlink($path);
+            }
+            rmdir($dir);
+        }
+        
+        // Bersihkan folder temp ekstraksi
+        deleteDir($tempExtractDir);
+        
+        // Hapus file ZIP sementara
         @unlink($tmpZipPath);
 
         // 3. Perbarui Versi Aplikasi di Database Lokal Klien
