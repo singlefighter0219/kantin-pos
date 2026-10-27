@@ -99,6 +99,15 @@ class ProductController {
             $total_biaya = (float)($data['total_biaya_kulakan'] ?? 0);
             $keterangan = trim($data['keterangan'] ?? 'Restock produk');
 
+            // --- CEK PENGATURAN TANGGAL MANUAL ---
+            $stmtSetting = $this->pdo->query("SELECT param_value FROM pengaturan WHERE param_key = 'enable_manual_date'");
+            $isManualDateEnabled = ($stmtSetting->fetchColumn() === '1');
+
+            $tanggalRestock = date('Y-m-d H:i:s');
+            if ($isManualDateEnabled && !empty($data['tanggal_manual'])) {
+                $tanggalRestock = $data['tanggal_manual'] . ' ' . date('H:i:s');
+            }
+
             if ($produk_id <= 0 || $qty_masuk <= 0) {$this->pdo->rollBack();
                 return ['status' => false, 'message' => 'Data restock tidak valid!'];
             }
@@ -148,10 +157,10 @@ class ProductController {
                 $no_nota = $prefixKonsinyasi . str_replace('.', '', microtime(true));
 
                 $stmtIns =$this->pdo->prepare("
-                    INSERT INTO penerimaan_titipan (no_nota_terima, vendor_id, produk_id, qty_masuk, qty_sisa, harga_titip, keterangan, is_settled) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                  INSERT INTO penerimaan_titipan (no_nota_terima, vendor_id, produk_id, qty_masuk, qty_sisa, harga_titip, keterangan, is_settled, tanggal_terima) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)
                 ");
-                $stmtIns->execute([$no_nota, $vendor_id,$produk_id, $qty_masuk,$qty_masuk, $harga_titip,$keterangan]);
+                $stmtIns->execute([$no_nota, $vendor_id,$produk_id, $qty_masuk,$qty_masuk, $harga_titip,$keterangan, $tanggalRestock]);
             } 
             // 3. Jika Milik Sendiri DAN ada biaya kulakan (> 0), catat otomatis ke tabel `buku_kas`
             else if ($kategori === 'sendiri' && $total_biaya > 0) {$ketKas = "Restock " . $produk['nama_produk'] . " (+" . $qty_masuk . " Pcs)";
@@ -160,10 +169,10 @@ class ProductController {
                 }
 
                 $stmtKas =$this->pdo->prepare("
-                    INSERT INTO buku_kas (tanggal, tipe, kategori, nominal, keterangan, ref_tipe, ref_id)
-                    VALUES (NOW(), 'keluar', 'Belanja Produk', ?, ?, 'restock', ?)
+                  INSERT INTO buku_kas (tanggal, tipe, kategori, nominal, keterangan, ref_tipe, ref_id)
+                  VALUES (?, 'keluar', 'Belanja Produk', ?, ?, 'restock', ?)
                 ");
-                $stmtKas->execute([$total_biaya, $ketKas,$produk_id]);
+                $stmtKas->execute([$tanggalRestock, $total_biaya, $ketKas, $produk_id]);
             }
 
             $this->pdo->commit();
@@ -196,6 +205,15 @@ class ProductController {
             $produk_id = (int)($data['produk_id'] ?? 0);
             $vendor_id = (int)($data['vendor_id'] ?? 0);
             $keterangan = trim($data['keterangan'] ?? 'Retur sisa titipan');
+
+            // --- CEK PENGATURAN TANGGAL MANUAL ---
+            $stmtSetting = $this->pdo->query("SELECT param_value FROM pengaturan WHERE param_key = 'enable_manual_date'");
+            $isManualDateEnabled = ($stmtSetting->fetchColumn() === '1');
+
+            $tanggalRetur = date('Y-m-d H:i:s');
+            if ($isManualDateEnabled && !empty($data['tanggal_manual'])) {
+                $tanggalRetur = $data['tanggal_manual'] . ' ' . date('H:i:s');
+            }
 
             if ($produk_id <= 0) {$this->pdo->rollBack();
                 return ['status' => false, 'message' => 'Data retur tidak valid!'];
@@ -242,11 +260,8 @@ class ProductController {
             $stmtUpdProduk->execute([$produk_id]);
 
             // 4. Catat riwayat ke tabel `retur_titipan`
-            $stmtInsRetur =$this->pdo->prepare("
-                INSERT INTO retur_titipan (no_nota_retur, vendor_id, produk_id, stok_awal, qty_retur, qty_terjual, harga_titip, total_setoran, keterangan) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-            $stmtInsRetur->execute([$no_nota, $vendor_id,$produk_id, $stokAwalBatch,$qty_retur, $qty_terjual,$harga_titip, $total_setoran,$keterangan]);
+            $stmtInsRetur =$this->pdo->prepare("INSERT INTO retur_titipan (no_nota_retur, vendor_id, produk_id, stok_awal, qty_retur, qty_terjual, harga_titip, total_setoran, keterangan, tanggal_retur) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmtInsRetur->execute([$no_nota, $vendor_id, $produk_id, $stokAwalBatch, $qty_retur, $qty_terjual, $harga_titip, $total_setoran, $keterangan, $tanggalRetur]);
             $returId =$this->pdo->lastInsertId();
 
             // 5. Catat otomatis ke `buku_kas` jika ada setoran wajib dibayar
@@ -255,11 +270,8 @@ class ProductController {
                     $ketKas .= " - " . $keterangan;
                 }
 
-                $stmtKas =$this->pdo->prepare("
-                    INSERT INTO buku_kas (tanggal, tipe, kategori, nominal, keterangan, ref_tipe, ref_id)
-                    VALUES (NOW(), 'keluar', 'Setoran Vendor', ?, ?, 'retur_vendor', ?)
-                ");
-                $stmtKas->execute([$total_setoran, $ketKas,$returId]);
+                $stmtKas =$this->pdo->prepare("INSERT INTO buku_kas (tanggal, tipe, kategori, nominal, keterangan, ref_tipe, ref_id) VALUES (?, 'keluar', 'Setoran Vendor', ?, ?, 'retur_vendor', ?)");
+                $stmtKas->execute([$tanggalRetur, $total_setoran, $ketKas, $returId]);
             }
 
             $this->pdo->commit();

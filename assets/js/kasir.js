@@ -178,7 +178,8 @@ $('#form-checkout').on('submit', function(e) {
         total_belanja: total,
         bayar: bayar,
         kembalian: bayar - total,
-        catatan: $('#catatan_transaksi').val()
+        catatan: $('#catatan_transaksi').val(),
+        tanggal_manual: $('#tanggal_manual').val()
     };
 
     $.ajax({

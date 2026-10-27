@@ -423,6 +423,13 @@ try {
                         <label class="form-label small fw-bold">Keterangan / Catatan (Opsional)</label>
                         <input type="text" name="keterangan" id="restock_keterangan" class="form-control" placeholder="Contoh: Titipan Pagi / Beli di Pasar">
                     </div>
+
+                    <?php if (isset($appSettings['enable_manual_date']) && $appSettings['enable_manual_date'] === '1'): ?>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-success">Tanggal Restock (Manual)</label>
+                        <input type="date" name="tanggal_manual" id="restock_tanggal_manual" class="form-control" value="<?= date('Y-m-d') ?>">
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="modal-footer border-top border-secondary border-opacity-10 px-4 py-3">
@@ -494,6 +501,13 @@ try {
                         <label class="form-label small fw-bold">Keterangan / Catatan</label>
                         <input type="text" name="keterangan" id="retur_keterangan" class="form-control" placeholder="Contoh: Penarikan sisa titipan sore hari">
                     </div>
+
+                    <?php if (isset($appSettings['enable_manual_date']) && $appSettings['enable_manual_date'] === '1'): ?>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-warning-emphasis">Tanggal Retur (Manual)</label>
+                        <input type="date" name="tanggal_manual" id="retur_tanggal_manual" class="form-control border-warning" value="<?= date('Y-m-d') ?>">
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="modal-footer border-top border-secondary border-opacity-10 px-4 py-3">

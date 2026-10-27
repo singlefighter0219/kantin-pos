@@ -16,6 +16,11 @@ function editBeban(data) {
     $('#nominal').val(Math.round(data.nominal || 0));
     $('#keterangan').val(data.keterangan || '');
 
+    if ($('#beban_tanggal_manual').length) {
+        let tglOnly = data.tanggal ? data.tanggal.substring(0, 10) : '';
+        $('#beban_tanggal_manual').val(tglOnly);
+    }
+
     $('#modalBeban').modal('show');
 }
 
@@ -24,6 +29,12 @@ $('#formBeban').on('submit', function(e) {
     e.preventDefault();
     
     let formData = $(this).serializeArray();
+
+    let tanggalManual = $('#beban_tanggal_manual').val();
+    if (tanggalManual) {
+        formData.push({ name: 'tanggal_manual', value: tanggalManual });
+    }
+
     formData.push({ name: 'action', value: 'simpan_beban' });
 
     $.ajax({

@@ -315,6 +315,12 @@ $('#formProduk').on('submit', function(e) {
 $('#formRestock').on('submit', function(e) {
     e.preventDefault();
     let formData = $(this).serializeArray();
+
+    let tanggalManual = $('#restock_tanggal_manual').val();
+    if (tanggalManual) {
+        formData.push({ name: 'tanggal_manual', value: tanggalManual });
+    }
+
     formData.push({ name: 'action', value: 'proses_restock' });
 
     $.ajax({
@@ -338,6 +344,12 @@ $('#formRestock').on('submit', function(e) {
 $('#formRetur').on('submit', function(e) {
     e.preventDefault();
     let formData = $(this).serializeArray();
+
+    let tanggalManual = $('#retur_tanggal_manual').val();
+    if (tanggalManual) {
+        formData.push({ name: 'tanggal_manual', value: tanggalManual });
+    }
+    
     formData.push({ name: 'action', value: 'proses_retur' });
 
     $.ajax({

@@ -17,6 +17,10 @@ class KasLainnyaController {
             $nominal = (float)($data['nominal'] ?? 0);
             $keterangan = trim($data['keterangan'] ?? '');
 
+            // Cek pengaturan tanggal manual
+            $stmtSetting = $this->pdo->query("SELECT param_value FROM pengaturan WHERE param_key = 'enable_manual_date'");
+            $isManualDateEnabled = ($stmtSetting->fetchColumn() === '1');
+
             if ($nominal <= 0) {
                 $this->pdo->rollBack();
                 return ['status' => false, 'message' => 'Nominal wajib diisi dan lebih besar dari 0!'];
@@ -28,24 +32,42 @@ class KasLainnyaController {
             }
 
             if ($id > 0) {
-                // UPDATE DATA
-                $stmtUpd = $this->pdo->prepare("
-                    UPDATE buku_kas 
-                    SET tipe = ?, kategori = ?, nominal = ?, keterangan = ?
-                    WHERE id = ? AND ref_tipe = 'kas_lainnya'
-                ");
-                $stmtUpd->execute([$tipe, $kategori, $nominal, $keterangan, $id]);
+                // --- PROSES UPDATE DATA ---
+                if ($isManualDateEnabled && !empty($data['tanggal_manual'])) {
+                    // Jika manual aktif dan diisi, perbarui data termasuk tanggalnya
+                    $tanggalKas = $data['tanggal_manual'] . ' ' . date('H:i:s');
+                    
+                    $stmtUpd = $this->pdo->prepare("
+                        UPDATE buku_kas 
+                        SET tanggal = ?, tipe = ?, kategori = ?, nominal = ?, keterangan = ?
+                        WHERE id = ? AND ref_tipe = 'kas_lainnya'
+                    ");
+                    $stmtUpd->execute([$tanggalKas, $tipe, $kategori, $nominal, $keterangan, $id]);
+                } else {
+                    // Jika manual tidak aktif, UPDATE data KECUALI kolom tanggal (pertahankan tanggal lama)
+                    $stmtUpd = $this->pdo->prepare("
+                        UPDATE buku_kas 
+                        SET tipe = ?, kategori = ?, nominal = ?, keterangan = ?
+                        WHERE id = ? AND ref_tipe = 'kas_lainnya'
+                    ");
+                    $stmtUpd->execute([$tipe, $kategori, $nominal, $keterangan, $id]);
+                }
 
                 $this->pdo->commit();
                 return ['status' => true, 'message' => 'Data kas berhasil diperbarui!'];
 
             } else {
-                // INSERT DATA BARU KE BUKU KAS
+                // --- PROSES INSERT DATA BARU ---
+                $tanggalKas = date('Y-m-d H:i:s');
+                if ($isManualDateEnabled && !empty($data['tanggal_manual'])) {
+                    $tanggalKas = $data['tanggal_manual'] . ' ' . date('H:i:s');
+                }
+
                 $stmtIns = $this->pdo->prepare("
                     INSERT INTO buku_kas (tanggal, tipe, kategori, nominal, keterangan, ref_tipe, ref_id)
-                    VALUES (NOW(), ?, ?, ?, ?, 'kas_lainnya', NULL)
+                    VALUES (?, ?, ?, ?, ?, 'kas_lainnya', NULL)
                 ");
-                $stmtIns->execute([$tipe, $kategori, $nominal, $keterangan]);
+                $stmtIns->execute([$tanggalKas, $tipe, $kategori, $nominal, $keterangan]);
                 
                 // Update ref_id agar menunjuk ke ID-nya sendiri untuk kemudahan pelacakan
                 $lastId = $this->pdo->lastInsertId();

@@ -22,6 +22,61 @@ if (!canAccess('admin')) {
     exit;
 }
 
+/**
+ * Jalankan migrasi database secara berurutan dari folder database/migrations/
+ */
+function runDatabaseMigrations($pdo) {
+    // 1. Buat tabel migrations jika belum ada
+    $pdo->exec("CREATE TABLE IF NOT EXISTS migrations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        migration_name VARCHAR(255) NOT NULL,
+        executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    // 2. Ambil daftar migrasi yang sudah pernah dijalankan
+    $stmt = $pdo->query("SELECT migration_name FROM migrations");
+    $executedMigrations = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+
+    // 3. Ambil semua file .sql dari folder database/migrations/
+    $migrationDir = __DIR__ . '/database/migrations/';
+    if (!is_dir($migrationDir)) {
+        return; // Jika folder migrasi belum ada, lewati
+    }
+
+    $files = scandir($migrationDir);
+    sort($files); // Urutkan secara alfabetis/numerik (misal: 001_..., 002_...)
+
+    foreach ($files as $file) {
+        if (pathinfo($file, PATHINFO_EXTENSION) === 'sql') {
+            // Jika file migrasi belum pernah dijalankan
+            if (!in_array($file, $executedMigrations)) {
+                $sqlPath = $migrationDir . $file;
+                $sqlContent = file_get_contents($sqlPath);
+
+                if (trim($sqlContent) !== '') {
+                    try {
+                        $pdo->beginTransaction();
+                        
+                        // Eksekusi skrip SQL
+                        $pdo->exec($sqlContent);
+
+                        // Catat file yang telah selesai dijalankan
+                        $stmtLog = $pdo->prepare("INSERT INTO migrations (migration_name) VALUES (?)");
+                        $stmtLog->execute([$file]);
+
+                        $pdo->commit();
+                    } catch (Exception $e) {
+                        if ($pdo->inTransaction()) {
+                            $pdo->rollBack();
+                        }
+                        throw new Exception("Gagal menjalankan migrasi {$file}: " . $e->getMessage());
+                    }
+                }
+            }
+        }
+    }
+}
+
 $action = $_GET['action'] ?? '';
 
 if ($action === 'download_and_extract') {
@@ -62,7 +117,7 @@ if ($action === 'download_and_extract') {
     if ($res === TRUE) {
         $extractPath = __DIR__ . '/';
         
-        // Ekstrak ke dalam folder temporary khusus agar tidak mengotori root folder
+        // Ekstrak ke folder temporary khusus
         $tempExtractDir = __DIR__ . '/temp_extracted_folder/';
         if (!is_dir($tempExtractDir)) {
             mkdir($tempExtractDir, 0777, true);
@@ -92,8 +147,16 @@ if ($action === 'download_and_extract') {
                 $subPath = substr($item->getPathname(), strlen($sourceDir));
                 $targetPath = $extractPath . $subPath;
                 
-                // Lewati folder config agar database lokal klien aman tidak tertimpa
-                if (strpos($subPath, 'config') === 0) {
+                // Normalisasi path separator untuk pengecekan lintas platform
+                $normalizedSubPath = str_replace('\\', '/', $subPath);
+                
+                // Daftar file yang dikecualikan agar tidak tertimpa saat update
+                $excludedFiles = [
+                    'config/database.php',
+                    'config/installed.lock'
+                ];
+
+                if (in_array($normalizedSubPath, $excludedFiles)) {
                     continue;
                 }
                 
@@ -107,7 +170,7 @@ if ($action === 'download_and_extract') {
             }
         }
         
-        // Fungsi helper untuk menghapus folder temporary secara total
+        // Helper untuk menghapus folder temporary secara total
         function deleteDir($dir) {
             if (!file_exists($dir)) return;
             $files = array_diff(scandir($dir), ['.', '..']);
@@ -118,17 +181,23 @@ if ($action === 'download_and_extract') {
             rmdir($dir);
         }
         
-        // Bersihkan folder temp ekstraksi
+        // Bersihkan folder temp ekstraksi & ZIP
         deleteDir($tempExtractDir);
-        
-        // Hapus file ZIP sementara
         @unlink($tmpZipPath);
 
-        // 3. Perbarui Versi Aplikasi di Database Lokal Klien
-        $stmt = $pdo->prepare("UPDATE pengaturan SET param_value = ? WHERE param_key = 'app_version'");
-        $stmt->execute([$newVersion]);
+        try {
+            // 3. Jalankan Sequential Migration Database secara otomatis
+            runDatabaseMigrations($pdo);
 
-        echo json_encode(['status' => 'success', 'message' => 'Aplikasi berhasil diperbarui ke versi ' . $newVersion]);
+            // 4. Perbarui Versi Aplikasi di Database Lokal Klien
+            $stmt = $pdo->prepare("UPDATE pengaturan SET param_value = ? WHERE param_key = 'app_version'");
+            $stmt->execute([$newVersion]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Aplikasi dan database berhasil diperbarui ke versi ' . $newVersion]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => 'Pembaruan berkas berhasil, tetapi gagal pada migrasi database: ' . $e->getMessage()]);
+        }
+
     } else {
         if (file_exists($tmpZipPath)) @unlink($tmpZipPath);
         echo json_encode([

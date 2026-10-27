@@ -9,6 +9,8 @@ require_once __DIR__ . '/../includes/header.php';
 
 $posController = new PosController($pdo);
 $produkList = $posController->getProdukAktif();
+
+$enableManualDate = isset($appSettings['enable_manual_date']) && $appSettings['enable_manual_date'] === '1';
 ?>
 
 <div class="container-fluid">
@@ -144,6 +146,13 @@ $produkList = $posController->getProdukAktif();
                                 <span class="small fw-bold">Kembalian:</span>
                                 <span class="fw-bold fs-6 text-success" id="kembalian">Rp 0</span>
                             </div>
+
+                            <?php if ($enableManualDate): ?>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold text-primary">Tanggal Transaksi (Manual)</label>
+                                <input type="date" id="tanggal_manual" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>">
+                            </div>
+                            <?php endif; ?>
 
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Catatan Transaksi (Opsional)</label>

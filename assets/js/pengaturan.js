@@ -23,6 +23,13 @@ $('.form-pengaturan').on('submit', function(e) {
     
     let formData = new FormData(this);
 
+    // Penanganan khusus untuk form_manual_date (checkbox switch jika dimatikan/unchecked)
+    let formTypeInput = $(this).find('input[name="form_type"]').val();
+    if (formTypeInput === 'form_manual_date') {
+        let isChecked = $(this).find('input[name="enable_manual_date"]').is(':checked');
+        formData.set('enable_manual_date', isChecked ? '1' : '0');
+    }
+
     $.ajax({
         url: './api/proses_pengaturan.php',
         type: 'POST',

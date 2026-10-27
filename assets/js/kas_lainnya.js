@@ -10,6 +10,11 @@ function editKas(data) {
     $('#modalKasTitle').html('<i class="fa-solid fa-pen-to-square me-2"></i> Edit Transaksi Kas');
     $('#btnSimpanKas').text('Perbarui Data');
 
+    if ($('#kas_tanggal_manual').length) {
+        let tglOnly = data.tanggal ? data.tanggal.substring(0, 10) : '';
+        $('#kas_tanggal_manual').val(tglOnly);
+    }
+
     $('#kas_id').val(data.id);
     $('#tipe').val(data.tipe);
     $('#kategori').val(data.kategori);
@@ -24,6 +29,10 @@ $('#formKas').on('submit', function(e) {
     e.preventDefault();
     
     let formData = $(this).serializeArray();
+    let tanggalManual = $('#kas_tanggal_manual').val();
+    if (tanggalManual) {
+        formData.push({ name: 'tanggal_manual', value: tanggalManual });
+    }
     formData.push({ name: 'action', value: 'simpan_kas' });
 
     $.ajax({

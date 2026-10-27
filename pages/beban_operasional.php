@@ -267,6 +267,13 @@ $totalPengeluaran =$bebanController->getTotalNominalBebanFiltered($dari,$sampai,
                         <label class="form-label small fw-bold">Keterangan / Catatan (Opsional)</label>
                         <textarea name="keterangan" id="keterangan" class="form-control" rows="3" placeholder="Contoh: Pembayaran token listrik bulan ini"></textarea>
                     </div>
+
+                    <?php if (isset($appSettings['enable_manual_date']) && $appSettings['enable_manual_date'] === '1'): ?>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-danger">Tanggal Pengeluaran (Manual)</label>
+                        <input type="date" name="tanggal_manual" id="beban_tanggal_manual" class="form-control" value="<?= date('Y-m-d') ?>">
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="modal-footer border-top border-secondary border-opacity-10 px-4 py-3">

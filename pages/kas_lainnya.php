@@ -258,6 +258,13 @@ $kasList =$kasController->getKasFiltered($dari,$sampai, $keyword,$semuaTanggal, 
                         <label class="form-label small fw-bold">Keterangan / Catatan</label>
                         <textarea name="keterangan" id="keterangan" class="form-control" rows="3" placeholder="Contoh: Tambah modal awal kembalian laci / Ambil uang untuk keperluan pribadi" required></textarea>
                     </div>
+
+                    <?php if (isset($appSettings['enable_manual_date']) && $appSettings['enable_manual_date'] === '1'): ?>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-primary">Tanggal Transaksi Kas (Manual)</label>
+                        <input type="date" name="tanggal_manual" id="kas_tanggal_manual" class="form-control" value="<?= date('Y-m-d') ?>">
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="modal-footer border-top border-secondary border-opacity-10 px-4 py-3">

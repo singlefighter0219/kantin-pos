@@ -192,12 +192,42 @@ $settings = $settingController->getAllSettings();
             </form>
         </div>
 
-        <!-- FORM 5: Pembaruan Sistem (In-App Updater) -->
-        <div class="col-xl-12">
+        <!-- FORM 5: Pengaturan Tanggal Manual / Backdate -->
+        <div class="col-xl-6">
+            <form class="form-pengaturan h-100" enctype="multipart/form-data">
+                <input type="hidden" name="form_type" value="form_manual_date">
+                <div class="card border-0 shadow-sm rounded-3 h-100 d-flex flex-column" style="background-color: var(--card-bg);">
+                    <div class="card-header bg-transparent border-bottom px-4 py-3">
+                        <h5 class="fw-bold m-0 text-primary fs-6">
+                            <i class="fa-solid fa-calendar-days me-2"></i> 5. Pengaturan Tanggal Manual (Backdate)
+                        </h5>
+                    </div>
+                    <div class="card-body p-4 flex-fill">
+                        <p class="text-muted small mb-3">
+                            Aktifkan opsi ini jika Anda ingin memunculkan pilihan *datepicker* tanggal pada modul Kasir, Restock/Retur Produk, Beban Operasional, dan Kas Lainnya untuk mencatat transaksi masa lalu.
+                        </p>
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" role="switch" name="enable_manual_date" id="enable_manual_date" value="1" <?= (isset($settings['enable_manual_date']) && (string)$settings['enable_manual_date'] === '1') ? 'checked' : '' ?>>
+                            <label class="form-check-label fw-bold" for="enable_manual_date">
+                                Izinkan Input Tanggal Manual / Backdate
+                            </label>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top p-3 text-end">
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Pengaturan Tanggal
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- FORM 6: Pembaruan Sistem (In-App Updater) -->
+        <div class="col-xl-6">
             <div class="card border-0 shadow-sm rounded-3" style="background-color: var(--card-bg);">
                 <div class="card-header bg-transparent border-bottom px-4 py-3">
                     <h5 class="fw-bold m-0 text-primary fs-6">
-                        <i class="fa-solid fa-sync-alt me-2"></i> 5. Pembaruan Sistem (In-App Updater)
+                        <i class="fa-solid fa-sync-alt me-2"></i> 6. Pembaruan Sistem (In-App Updater)
                     </h5>
                 </div>
                 <div class="card-body p-4">

@@ -217,13 +217,24 @@ class PosController {
                 ];
             }
 
-            // 1. Insert ke tabel `penjualan`
+            // Cek apakah pengaturan tanggal manual aktif
+            $stmtSetting = $this->pdo->prepare("SELECT param_value FROM pengaturan WHERE param_key = 'enable_manual_date'");
+            $stmtSetting->execute();
+            $isManualDateEnabled = ($stmtSetting->fetchColumn() === '1');
+
+            // Ambil tanggal manual dari form jika aktif dan terisi, jika tidak gunakan NOW()
+            $tanggalTransaksi = NOW();
+            if ($isManualDateEnabled && !empty($data['tanggal_manual'])) {
+                $tanggalTransaksi = $data['tanggal_manual'] . ' ' . date('H:i:s'); // Gabungkan tanggal pilihan dengan jam saat ini
+            }
+
+            // 1. Insert ke tabel `penjualan` (Gunakan variabel $tanggalTransaksi)
             $stmtInsPenjualan =$this->pdo->prepare("
                 INSERT INTO penjualan (no_nota, tanggal, total_belanja, total_modal, total_laba, bayar, kembalian, kasir, catatan)
-                VALUES (?, NOW(), ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmtInsPenjualan->execute([
-                $no_nota,$total_belanja, $total_modal,$total_laba, $bayar,$kembalian, $nama_kasir,$catatan
+                $no_nota, $tanggalTransaksi, $total_belanja, $total_modal, $total_laba, $bayar, $kembalian, $nama_kasir, $catatan
             ]);
             $penjualan_id =$this->pdo->lastInsertId();
 
@@ -287,9 +298,9 @@ class PosController {
 
             $stmtKas =$this->pdo->prepare("
                 INSERT INTO buku_kas (tanggal, tipe, kategori, nominal, keterangan, ref_tipe, ref_id)
-                VALUES (NOW(), 'masuk', 'Penjualan', ?, ?, 'penjualan_pos', ?)
+                VALUES (?, 'masuk', 'Penjualan', ?, ?, 'penjualan_pos', ?)
             ");
-            $stmtKas->execute([$total_belanja, $ketKas,$penjualan_id]);
+            $stmtKas->execute([$tanggalTransaksi, $total_belanja, $ketKas, $penjualan_id]);
 
             // 4. Kosongkan keranjang user ini setelah checkout berhasil
             $stmtClear =$this->pdo->prepare("DELETE FROM keranjang WHERE user_id = ?");

@@ -17,55 +17,80 @@ class OperationalExpenseController {
             $nominal = (float)($data['nominal'] ?? 0);
             $keterangan = trim($data['keterangan'] ?? '');
 
-            if (empty($nama_beban) || $nominal <= 0) {$this->pdo->rollBack();
+            // Cek pengaturan tanggal manual
+            $stmtSetting = $this->pdo->query("SELECT param_value FROM pengaturan WHERE param_key = 'enable_manual_date'");
+            $isManualDateEnabled = ($stmtSetting->fetchColumn() === '1');
+
+            if (empty($nama_beban) || $nominal <= 0) {
+                $this->pdo->rollBack();
                 return ['status' => false, 'message' => 'Nama pengeluaran dan nominal wajib diisi dengan benar!'];
             }
 
             if ($id > 0) {
-                // UPDATE DATA
-                $stmtUpd =$this->pdo->prepare("
-                    UPDATE beban_operasional 
-                    SET nama_beban = ?, kategori_beban = ?, nominal = ?, keterangan = ?
-                    WHERE id = ?
-                ");
-                $stmtUpd->execute([$nama_beban, $kategori_beban,$nominal, $keterangan,$id]);
+                // --- PROSES EDIT / UPDATE ---
+                if ($isManualDateEnabled && !empty($data['tanggal_manual'])) {
+                    // Jika manual aktif dan diisi, ambil tanggal manual + jam saat ini
+                    $tanggalBeban = $data['tanggal_manual'] . ' ' . date('H:i:s');
+                    
+                    // UPDATE data termasuk tanggalnya
+                    $stmtUpd = $this->pdo->prepare("
+                        UPDATE beban_operasional 
+                        SET tanggal = ?, nama_beban = ?, kategori_beban = ?, nominal = ?, keterangan = ?
+                        WHERE id = ?
+                    ");
+                    $stmtUpd->execute([$tanggalBeban, $nama_beban, $kategori_beban, $nominal, $keterangan, $id]);
 
-                // Update juga pada tabel `buku_kas` yang berelasi
-                $ketKas = "Biaya Operasional: " . $nama_beban;
-                if (!empty($keterangan)) {
-                    $ketKas .= " (" . $keterangan . ")";
+                    $stmtKasUpd = $this->pdo->prepare("
+                        UPDATE buku_kas 
+                        SET tanggal = ?, kategori = 'Biaya Operasional', nominal = ?, keterangan = ? 
+                        WHERE ref_tipe = 'beban_operasional' AND ref_id = ?
+                    ");
+                    $stmtKasUpd->execute([$tanggalBeban, $nominal, "Biaya Operasional: " . $nama_beban . (!empty($keterangan) ? " (" . $keterangan . ")" : ""), $id]);
+
+                } else {
+                    // Jika manual TIDAK aktif, UPDATE data KECUALI kolom tanggal (tanggal lama dipertahankan)
+                    $stmtUpd = $this->pdo->prepare("
+                        UPDATE beban_operasional 
+                        SET nama_beban = ?, kategori_beban = ?, nominal = ?, keterangan = ?
+                        WHERE id = ?
+                    ");
+                    $stmtUpd->execute([$nama_beban, $kategori_beban, $nominal, $keterangan, $id]);
+
+                    $stmtKasUpd = $this->pdo->prepare("
+                        UPDATE buku_kas 
+                        SET kategori = 'Biaya Operasional', nominal = ?, keterangan = ? 
+                        WHERE ref_tipe = 'beban_operasional' AND ref_id = ?
+                    ");
+                    $stmtKasUpd->execute([$nominal, "Biaya Operasional: " . $nama_beban . (!empty($keterangan) ? " (" . $keterangan . ")" : ""), $id]);
                 }
-
-                $stmtKasUpd =$this->pdo->prepare("
-                    UPDATE buku_kas 
-                    SET kategori = 'Biaya Operasional', nominal = ?, keterangan = ? 
-                    WHERE ref_tipe = 'beban_operasional' AND ref_id = ?
-                ");
-                $stmtKasUpd->execute([$nominal, $ketKas,$id]);
 
                 $this->pdo->commit();
                 return ['status' => true, 'message' => 'Biaya operasional berhasil diperbarui!'];
 
             } else {
-                // INSERT DATA BARU
-                $stmtIns =$this->pdo->prepare("
-                    INSERT INTO beban_operasional (tanggal, nama_beban, kategori_beban, nominal, keterangan)
-                    VALUES (NOW(), ?, ?, ?, ?)
-                ");
-                $stmtIns->execute([$nama_beban,$kategori_beban, $nominal,$keterangan]);
-                $bebanId =$this->pdo->lastInsertId();
+                // --- PROSES INSERT DATA BARU ---
+                $tanggalBeban = date('Y-m-d H:i:s');
+                if ($isManualDateEnabled && !empty($data['tanggal_manual'])) {
+                    $tanggalBeban = $data['tanggal_manual'] . ' ' . date('H:i:s');
+                }
 
-                // Catat ke tabel `buku_kas`
+                $stmtIns = $this->pdo->prepare("
+                    INSERT INTO beban_operasional (tanggal, nama_beban, kategori_beban, nominal, keterangan)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                $stmtIns->execute([$tanggalBeban, $nama_beban, $kategori_beban, $nominal, $keterangan]);
+                $bebanId = $this->pdo->lastInsertId();
+
                 $ketKas = "Biaya Operasional: " . $nama_beban;
                 if (!empty($keterangan)) {
                     $ketKas .= " (" . $keterangan . ")";
                 }
 
-                $stmtKas =$this->pdo->prepare("
+                $stmtKas = $this->pdo->prepare("
                     INSERT INTO buku_kas (tanggal, tipe, kategori, nominal, keterangan, ref_tipe, ref_id)
-                    VALUES (NOW(), 'keluar', 'Biaya Operasional', ?, ?, 'beban_operasional', ?)
+                    VALUES (?, 'keluar', 'Biaya Operasional', ?, ?, 'beban_operasional', ?)
                 ");
-                $stmtKas->execute([$nominal, $ketKas,$bebanId]);
+                $stmtKas->execute([$tanggalBeban, $nominal, $ketKas, $bebanId]);
 
                 $this->pdo->commit();
                 return ['status' => true, 'message' => 'Biaya operasional berhasil dicatat ke Buku Kas!'];

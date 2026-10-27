@@ -61,6 +61,19 @@ class SettingController {
                     }
                 }
                 $msg = 'Logo toko berhasil diperbarui!';
+            }
+            elseif ($formType === 'form_manual_date') {
+                $val = (isset($postData['enable_manual_date']) && $postData['enable_manual_date'] == '1') ? '1' : '0';
+                
+                // Gunakan UPSERT agar jika param_key belum ada di tabel, otomatis di-insert
+                $stmtUpsert = $this->pdo->prepare("
+                    INSERT INTO pengaturan (param_key, param_value) 
+                    VALUES ('enable_manual_date', ?) 
+                    ON DUPLICATE KEY UPDATE param_value = VALUES(param_value)
+                ");
+                $stmtUpsert->execute([$val]);
+                
+                $msg = 'Pengaturan tanggal manual berhasil diperbarui!';
             } else {
                 throw new Exception('Aksi form tidak valid.');
             }
