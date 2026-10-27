@@ -153,7 +153,8 @@ if ($action === 'download_and_extract') {
                 // Daftar file yang dikecualikan agar tidak tertimpa saat update
                 $excludedFiles = [
                     'config/database.php',
-                    'config/installed.lock'
+                    'config/installed.lock',
+                    '.htaccess'
                 ];
 
                 if (in_array($normalizedSubPath, $excludedFiles)) {
