@@ -89,7 +89,7 @@ try {
                 ?>
                 <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                     <div class="card shadow-sm rounded-3 h-100 d-flex flex-column <?= $cardClass ?>" style="background-color: var(--card-bg);">
-                        <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div class="card-body card-bg p-3 d-flex flex-column justify-content-between">
                             
                             <div>
                                 <div class="d-flex justify-content-between align-items-start mb-2">
@@ -117,10 +117,10 @@ try {
                                 <?php endif; ?>
                             </div>
 
-                            <div class="bg-body-tertiary p-2 rounded-2 my-2 small">
+                            <div class="bg-body-tertiary border border-secondary border-opacity-25 p-2 rounded-2 my-2 small">
                                 <div class="d-flex justify-content-between mb-1">
                                     <span class="text-muted">Modal / HPP:</span>
-                                    <span class="fw-semibold">Rp <?= number_format($p['kategori_kepemilikan'] === 'sendiri' ? $p['hpp'] : $p['harga_titip'], 0, ',', '.') ?></span>
+                                    <span class="fw-semibold text-dark">Rp <?= number_format($p['kategori_kepemilikan'] === 'sendiri' ? $p['hpp'] : $p['harga_titip'], 0, ',', '.') ?></span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-1">
                                     <span class="text-muted">Harga Jual:</span>
@@ -136,7 +136,17 @@ try {
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <small class="text-muted">Status Stok:</small>
                                     <?php if ($p['kelola_stok'] == 1): ?>
-                                        <span class="badge bg-info text-dark fw-bold"><?= $p['stok'] ?> Pcs</span>
+                                        <?php 
+                                            // Menentukan warna badge berdasarkan jumlah sisa stok
+                                            if ($p['stok'] == 0) {
+                                                $badgeStokClass = 'bg-danger text-white';
+                                            } elseif ($p['stok'] <= 5) {
+                                                $badgeStokClass = 'bg-warning text-dark';
+                                            } else {
+                                                $badgeStokClass = 'bg-info text-dark';
+                                            }
+                                        ?>
+                                        <span class="badge <?= $badgeStokClass ?> fw-bold"><?= $p['stok'] ?> Pcs</span>
                                     <?php else: ?>
                                         <span class="badge bg-secondary">Bebas Stok</span>
                                     <?php endif; ?>
@@ -144,7 +154,7 @@ try {
 
                                 <div class="d-flex align-items-center gap-2 mt-3">
                                     <?php if ($p['kelola_stok'] == 1 && !$isNonAktif): ?>
-                                        <button class="btn btn-sm btn-success flex-grow-1" onclick='bukaModalRestock(<?= json_encode($p) ?>)' title="Tambah Stok / Restock">
+                                        <button class="btn btn-sm btn-primary flex-grow-1" onclick='bukaModalRestock(<?= json_encode($p) ?>)' title="Tambah Stok / Restock">
                                             <i class="fa-solid fa-plus me-1"></i> Restock
                                         </button>
 

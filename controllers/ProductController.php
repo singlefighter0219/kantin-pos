@@ -359,7 +359,7 @@ class ProductController {
             }
 
             // Tambahkan limit dan offset langsung ke array params agar tereksekusi dengan aman
-            $sql .= " ORDER BY p.id DESC LIMIT ? OFFSET ?";
+            $sql .= " ORDER BY p.nama_produk LIMIT ? OFFSET ?";
             array_push($params, (int)$limit, (int)$offset);
 
             $stmt = $this->pdo->prepare($sql);

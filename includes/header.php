@@ -39,6 +39,7 @@ $userTheme       = $_SESSION['user_theme'];
 
 $appSettings     = $settingController->getAllSettings();
 $namaAplikasi    = $appSettings['nama_aplikasi'] ?? 'Kantin POS';
+$tagline         = $appSettings['tagline'] ?? '';
 $favicoFile      = $appSettings['favico'] ?? '';
 $logoToko        = $appSettings['logo'] ?? '';
 
@@ -99,27 +100,23 @@ if (!function_exists('canAccess')) {
     <!-- Sidebar Navigation -->
     <div class="sidebar p-3 d-flex flex-column justify-content-between" id="appSidebar">
         <div>
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="sidebar-title fs-5 fw-bold m-0 text-truncate" title="<?= htmlspecialchars($namaAplikasi) ?>">
-                        <?php if (!empty($logoToko)): ?>
-                            <img src="<?= BASE_URL ?>assets/uploads/<?= htmlspecialchars($logoToko) ?>" alt="Logo" style="height: 24px; object-fit: contain;" class="me-2">
-                        <?php else: ?>
-                            <i class="fa-solid fa-utensils me-2"></i>
-                        <?php endif; ?>
-                        <?= htmlspecialchars($namaAplikasi) ?>
-                    </h4>
-                    <!-- Informasi Nama Sekolah / Instansi di Sidebar -->
-                    <?php if (!empty($appSettings['nama_pemilik'])): ?>
-                        <small class="text-muted d-block mt-1 ps-1" style="font-size: 10.5px; font-weight: 600;">
-                            <i class="fa-solid fa-school me-1 text-primary"></i> <?= htmlspecialchars($appSettings['nama_pemilik']) ?>
-                        </small>
-                    <?php endif; ?>
-                </div>
-                <!-- Tombol Close khusus Tampilan HP -->
-                <button class="btn btn-sm btn-outline-secondary d-lg-none" onclick="toggleSidebar()">
-                    <i class="fa-solid fa-xmark"></i>
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-10">
+                <!-- Tombol Close Dipercantik dengan Efek Hover Dinamis -->
+                <button class="btn btn-sm border border-secondary border-opacity-25 rounded-pill d-flex align-items-center gap-2 px-3 py-1 shadow-sm d-lg-none transition-hover" 
+                        style="background-color: var(--card-bg); color: var(--text-color);" 
+                        onmouseover="this.style.backgroundColor='var(--sidebar-hover)'; this.style.borderColor='var(--primary-color)';" 
+                        onmouseout="this.style.backgroundColor='var(--card-bg)'; this.style.borderColor='var(--border-color)';" 
+                        onclick="toggleSidebar()" 
+                        title="Tutup Menu">
+                    <i class="fa-solid fa-xmark fa-fw text-danger"></i> 
+                    <span class="small fw-bold">Tutup Menu</span>
                 </button>
+
+                <!-- Badge Indikator Navigasi yang Elegan -->
+                <span class="badge border border-secondary border-opacity-25 px-3 py-2 rounded-pill d-lg-none shadow-sm transition-hover" 
+                      style="font-size: 10.5px; background-color: var(--sidebar-bg); color: var(--sidebar-text); font-weight: 600;">
+                    <i class="fa-solid fa-bars-staggered me-1"></i> Navigasi
+                </span>
             </div>
 
             <!-- Menu Navigasi yang Dikelompokkan & Ditata Rapi -->
@@ -205,36 +202,73 @@ if (!function_exists('canAccess')) {
     </div>
 
     <!-- Main Content Wrapper -->
-    <div class="flex-fill d-flex flex-column min-vh-100 overflow-hidden">
+    <div class="flex-fill d-flex flex-column min-vh-100" style="overflow-x: hidden;">
         
         <!-- Topbar / Header Atas -->
-        <nav class="navbar navbar-expand px-3 px-md-4 py-3 shadow-sm" style="background-color: var(--card-bg);">
+        <nav class="navbar navbar-expand px-3 px-md-4 py-3 shadow-sm fixed-top" style="background-color: var(--topbar-bg); border-bottom: 1px solid var(--topbar-border); z-index: 1040; width: 100%;">
             <div class="container-fluid px-0">
                 <div class="d-flex align-items-center gap-2">
                     <!-- Tombol Hamburger untuk Toggle Sidebar di HP -->
                     <button class="btn btn-sm btn-outline-theme d-lg-none" onclick="toggleSidebar()" type="button">
                         <i class="fa-solid fa-bars"></i>
                     </button>
-                    <span class="navbar-brand mb-0 h6 fw-bold text-truncate" style="color: var(--text-color);">
-                        <i class="fa-solid fa-store me-2 text-primary"></i> <?= htmlspecialchars($namaAplikasi) ?>
-                    </span>
+                    
+                    <!-- LOGO, NAMA APLIKASI, & NAMA INSTANSI -->
+                    <a href="<?= BASE_URL ?>" class="navbar-brand mb-0 text-decoration-none d-flex align-items-center gap-2" style="color: var(--text-color);" title="<?= htmlspecialchars($namaAplikasi) ?>">
+                        <?php if (!empty($logoToko)): ?>
+                            <img src="<?= BASE_URL ?>assets/uploads/<?= htmlspecialchars($logoToko) ?>" alt="Logo" style="height: 32px; object-fit: contain;">
+                        <?php else: ?>
+                            <i class="fa-solid fa-utensils fa-lg text-primary"></i>
+                        <?php endif; ?>
+                        
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold text-truncate" style="font-size: 15px; line-height: 1.2;"><?= htmlspecialchars($namaAplikasi) ?></span>
+                            
+                            <?php if (!empty($appSettings['nama_pemilik'])): ?>
+                                <small class="text-muted" style="font-size: 10.5px; font-weight: 600; line-height: 1.2;">
+                                    <i class="fa-solid fa-school me-1 text-primary"></i><?= htmlspecialchars($appSettings['nama_pemilik']) ?>
+                                </small>
+                            <?php endif; ?>
+                        </div>
+                    </a>
                 </div>
                 
-                <!-- Menu Kanan Topbar (Profil & Tombol Keluar Dipercantik) -->
+                <!-- Menu Kanan Topbar (Profil & Tombol Keluar) -->
                 <div class="d-flex align-items-center gap-3">
-                    <a href="<?= BASE_URL ?>profil" class="d-flex align-items-center gap-2 d-none d-sm-flex text-decoration-none p-1 rounded hover-bg" title="Buka Halaman Profil">
-                        <div class="text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="background-color: var(--primary-color); width: 36px; height: 36px; font-size: 14px;">
+                    
+                    <!-- Desain Profil Seamless / Menyatu dengan Topbar -->
+                    <a href="<?= BASE_URL ?>profil" 
+                       class="d-flex align-items-center text-decoration-none px-2 py-1 rounded-3 transition-all" 
+                       style="gap: 10px;"
+                       onmouseover="this.style.backgroundColor='var(--sidebar-hover)';" 
+                       onmouseout="this.style.backgroundColor='transparent';"
+                       title="Buka Halaman Profil">
+                        
+                        <!-- Avatar Inisial Bulat -->
+                        <div class="text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm flex-shrink-0" 
+                             style="background-color: var(--primary-color); width: 34px; height: 34px; font-size: 13.5px;">
                             <?= strtoupper(substr($currentNamaUser, 0, 1)) ?>
                         </div>
-                        <div class="text-start">
-                            <div class="fw-bold lh-1 mb-1 text-primary" style="font-size: 13px;"><?= htmlspecialchars($currentNamaUser) ?></div>
-                            <!-- Badge Role Topbar Dipercantik -->
-                            <span class="badge <?= $currentRoleUser === 'admin' ? 'bg-danger text-white' : 'bg-info text-dark' ?> text-capitalize px-2 py-1 rounded-pill" style="font-size: 8.5px; font-weight: 600; letter-spacing: 0.5px;"><?= htmlspecialchars($currentRoleUser) ?></span>
+
+                        <!-- Wadah Teks: Nama & Role -->
+                        <div class="d-flex flex-column text-start" style="line-height: 1.2;">
+                            <span class="fw-bold text-truncate" style="font-size: 13px; max-width: 110px; color: var(--text-color);">
+                                <?= htmlspecialchars($currentNamaUser) ?>
+                            </span>
+                            <span class="text-capitalize mt-0.5" style="font-size: 9.5px; font-weight: 600; color: var(--primary-color); letter-spacing: 0.3px;">
+                                <?= htmlspecialchars($currentRoleUser) ?>
+                            </span>
+                        </div>
+
+                        <!-- Ikon Panah Kecil Minimalis -->
+                        <div class="text-muted opacity-50 ms-1" style="font-size: 9px;">
+                            <i class="fa-solid fa-chevron-right"></i>
                         </div>
                     </a>
                     
-                    <div class="vr mx-1 text-muted d-none d-sm-block opacity-25"></div>
+                    <div class="vr mx-1 text-muted d-none d-sm-block opacity-25" style="height: 24px;"></div>
 
+                    <!-- Tombol Keluar / Logout -->
                     <button type="button" id="btn-logout" class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm d-flex align-items-center gap-2 fw-semibold" title="Keluar dari Aplikasi">
                         <i class="fa-solid fa-right-from-bracket"></i> <span class="d-none d-md-inline">Keluar</span>
                     </button>
@@ -243,4 +277,4 @@ if (!function_exists('canAccess')) {
         </nav>
 
         <!-- Content Body -->
-        <div class="p-3 p-md-4 flex-fill overflow-auto">
+        <div class="p-3 p-md-4 flex-fill overflow-auto" style="margin-top: 75px;">

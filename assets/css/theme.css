@@ -13,9 +13,11 @@
     --sidebar-active-text: #ffffff;
     --body-bg: #f8fafc;
     --card-bg: #ffffff;
+    --topbar-bg: #ffffff;
+    --topbar-border: #bae6fd;
     --product-card-bg: #f0f9ff;
     --text-color: #334155;
-    --border-color: #e2e8f0;
+    --border-color: #cbd5e1;
 }
 
 /* Theme 2: Pink / Rose */
@@ -28,10 +30,12 @@
     --sidebar-active: #ec4899;
     --sidebar-active-text: #ffffff;
     --body-bg: #fff5f7;
-    --card-bg: #ffffff;
+    --card-bg: #fff3ff; /* Putih bernuansa pink lembut yang matching */
+    --topbar-bg: #fff0f3;
+    --topbar-border: #fbcfe8;
     --product-card-bg: #fff1f4;
     --text-color: #334155;
-    --border-color: #fbcfe8;
+    --border-color: #f7cbdc;
 }
 
 /* Theme 3: Ungu Muda (Lavender) */
@@ -44,10 +48,12 @@
     --sidebar-active: #8b5cf6;
     --sidebar-active-text: #ffffff;
     --body-bg: #faf5ff;
-    --card-bg: #ffffff;
+    --card-bg: #fdfcff; /* Putih bernuansa ungu lavender yang elegan */
+    --topbar-bg: #f8f2ff;
+    --topbar-border: #e9d5ff;
     --product-card-bg: #f5f3ff;
     --text-color: #334155;
-    --border-color: #e9d5ff;
+    --border-color: #e2d4f8;
 }
 
 /* Theme 4: Hijau (Emerald) */
@@ -60,10 +66,12 @@
     --sidebar-active: #10b981;
     --sidebar-active-text: #ffffff;
     --body-bg: #f0fdf4;
-    --card-bg: #ffffff;
+    --card-bg: #fefffe; /* Putih bernuansa hijau pastel yang segar */
+    --topbar-bg: #f3fff8;
+    --topbar-border: #a7f3d0;
     --product-card-bg: #ecfdf5;
     --text-color: #334155;
-    --border-color: #a7f3d0;
+    --border-color: #bbf7d0;
 }
 
 /* Theme 5: Orange (Warm Amber) */
@@ -76,10 +84,12 @@
     --sidebar-active: #f97316;
     --sidebar-active-text: #ffffff;
     --body-bg: #fff7ed;
-    --card-bg: #ffffff;
+    --card-bg: #fffefb; /* Putih bernuansa hangat amber/oranye */
+    --topbar-bg: #fffaf2;
+    --topbar-border: #fed7aa;
     --product-card-bg: #fffaf0;
     --text-color: #334155;
-    --border-color: #fed7aa;
+    --border-color: #fde6cc;
 }
 
 /* Theme 6: Dark Mode */
@@ -93,6 +103,8 @@
     --sidebar-active-text: #ffffff;
     --body-bg: #0f172a;
     --card-bg: #1e293b;
+    --topbar-bg: #1e293b;
+    --topbar-border: #334155;
     --product-card-bg: #090d16;
     --text-color: #f1f5f9;
     --border-color: #334155;
@@ -123,17 +135,20 @@ body {
     min-width: 0; /* Mencegah elemen flex meluber ke samping */
 }
 
-/* Pengaturan Lebar Sidebar yang Ringkas & Padat */
+/* Pengaturan Sidebar */
 .sidebar {
     width: 230px;
     min-width: 230px;
-    height: 100vh;
-    position: sticky;
-    top: 0;
+    height: calc(100vh - 70px); /* Tinggi dikurangi tinggi topbar */
+    position: fixed;
+    top: 70px; /* Mulai pas di bawah topbar (tinggi topbar sekitar 70px) */
+    left: 0;
+    z-index: 1030;
     overflow-y: auto;
     background-color: var(--sidebar-bg);
     border-right: 1px solid var(--border-color);
     transition: all 0.3s ease;
+    padding-top: 10px; /* Padding atas dikembalikan normal karena sudah turun otomatis */
 }
 
 .sidebar-title {
@@ -249,6 +264,13 @@ body {
     background-color: var(--primary-color) !important;
     border-color: var(--primary-color) !important;
     color: #ffffff !important;
+}
+
+/* Geser konten utama ke kanan seluas lebar sidebar pada layar besar */
+@media (min-width: 992px) {
+    .d-flex.w-100 > .flex-fill {
+        margin-left: 230px;
+    }
 }
 
 @media (max-width: 991.98px) {

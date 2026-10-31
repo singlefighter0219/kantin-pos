@@ -2,10 +2,20 @@
 
         <!-- Footer Utama -->
         <footer class="text-center py-3 mt-auto border-top text-muted small" style="background-color: var(--card-bg); font-size: 11.5px;">
-            &copy; <?= date('Y') ?> <strong><?= htmlspecialchars($appSettings['nama_aplikasi'] ?? 'Kantin POS') ?></strong> 
-            <?php if (!empty($appSettings['nama_pemilik'])): ?>
-                &bull; Dikelola oleh <?= htmlspecialchars($appSettings['nama_pemilik']) ?>
-            <?php endif; ?>
+            <div class="container-fluid d-flex flex-column align-items-center gap-1">
+                <div>
+                    &copy; <?= date('Y') ?> <strong><?= htmlspecialchars($appSettings['nama_aplikasi'] ?? 'Kantin POS') ?></strong> 
+                    <?php if (!empty($appSettings['nama_pemilik'])): ?>
+                        &bull; Dikelola oleh <?= htmlspecialchars($appSettings['nama_pemilik']) ?>
+                    <?php endif; ?>
+                </div>
+                
+                <?php if (!empty($appSettings['tagline'])): ?>
+                    <div class="fst-italic text-secondary" style="font-size: 11px;">
+                        "<?= htmlspecialchars($appSettings['tagline']) ?>"
+                    </div>
+                <?php endif; ?>
+            </div>
         </footer>
     </div> <!-- End Main Content Wrapper -->
 </div> <!-- End Wrapper D-flex -->

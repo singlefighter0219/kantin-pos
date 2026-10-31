@@ -16,6 +16,7 @@ if (isset($_SESSION['user_id'])) {
 $settingController = new SettingController($pdo);
 $appSettings       = $settingController->getAllSettings();
 $namaAplikasi      = $appSettings['nama_aplikasi'] ?? 'Kantin POS';
+$tagline           = $appSettings['tagline'] ?? '';
 $namaPemilik       = $appSettings['nama_pemilik'] ?? ''; // Menyimpan nama sekolah/instansi
 $logoToko          = $appSettings['logo'] ?? '';
 $favicoFile        = $appSettings['favico'] ?? '';
@@ -36,7 +37,13 @@ $favicoFile        = $appSettings['favico'] ?? '';
     <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/theme.css">
     <style>
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            /* Latar belakang Mesh Gradient yang cantik dan elegan */
+            background: 
+                radial-gradient(at 0% 0%, rgba(224, 195, 252, 0.4) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(142, 197, 252, 0.4) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(255, 209, 255, 0.4) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(161, 196, 253, 0.4) 0px, transparent 50%),
+                #f8f9fc;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -47,77 +54,97 @@ $favicoFile        = $appSettings['favico'] ?? '';
         }
         .login-wrapper {
             width: 100%;
-            max-width: 440px;
+            max-width: 420px;
         }
         .login-card {
-            background-color: var(--card-bg, #ffffff);
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            /* Efek Glassmorphism (Kaca Buram) */
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.05);
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
+        }
+        .login-card:hover {
+            transform: translateY(-5px);
         }
         .login-header-icon {
-            width: 72px;
-            height: 72px;
-            background: rgba(13, 110, 253, 0.1);
-            color: #0d6efd;
+            width: 75px;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #0ea5e9;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            border-radius: 22px;
             margin: 0 auto 15px auto;
-            font-size: 28px;
+            font-size: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
             overflow: hidden;
+            border: 1px solid rgba(255,255,255,1);
         }
         .login-header-icon img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
         }
         .school-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background-color: rgba(13, 110, 253, 0.06);
-            color: #0d6efd;
+            background-color: rgba(255, 255, 255, 0.7);
+            color: #0369a1;
             font-size: 11.5px;
             font-weight: 600;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(13, 110, 253, 0.12);
+            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         }
-        .form-control:focus {
-            box-shadow: none;
-            border-color: #0d6efd;
+        .form-control {
+            padding: 12px 15px;
+            font-size: 14px;
+            background: transparent;
+            border: none;
+        }
+        .input-group {
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
         }
         .input-group-text {
             background-color: transparent;
-            border-right: none;
-            color: #6c757d;
-        }
-        .form-control {
-            border-left: none;
+            border: none;
+            color: #64748b;
+            padding-left: 16px;
         }
         .input-group:focus-within {
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-            border-radius: 6px;
-        }
-        .input-group:focus-within .input-group-text,
-        .input-group:focus-within .form-control {
-            border-color: #0d6efd;
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #bae6fd;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
         }
         .btn-login-submit {
             padding: 12px;
             font-weight: 600;
+            font-size: 14.5px;
             letter-spacing: 0.5px;
-            border-radius: 8px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-radius: 12px;
+            background: #0ea5e9;
+            border: none;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
         .btn-login-submit:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+            background: #0284c7;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
         }
     </style>
 </head>
@@ -125,7 +152,7 @@ $favicoFile        = $appSettings['favico'] ?? '';
 
 <div class="login-wrapper">
     <div class="card login-card p-4 p-md-5">
-        <div class="text-center mb-4">
+        <div class="text-center mb-1">
             <div class="login-header-icon shadow-sm">
                 <?php if (!empty($logoToko)): ?>
                     <img src="<?= BASE_URL ?>assets/uploads/<?= htmlspecialchars($logoToko) ?>" alt="Logo Kantin">
@@ -144,7 +171,14 @@ $favicoFile        = $appSettings['favico'] ?? '';
                 </div>
             <?php endif; ?>
 
-            <p class="text-muted small mb-0">Silakan masuk menggunakan akun Anda</p>
+            <!-- Tagline diletakkan tepat di bawah nama pemilik / badge instansi -->
+            <?php if (!empty($tagline)): ?>
+                <div class="fst-italic text-secondary small mb-3" style="font-size: 11.5px;">
+                    "<?= htmlspecialchars($tagline) ?>"
+                </div>
+            <?php endif; ?>
+
+            <p class="text-muted small mb-0">Silahkan masuk menggunakan akun Anda</p>
         </div>
 
         <form id="form-login">

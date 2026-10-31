@@ -67,7 +67,7 @@ $currentUser = $userController->getUserById($_SESSION['user_id']);
         <div class="col-md-6">
             <div class="card border-0 shadow-sm rounded-3 h-100" style="background-color: var(--card-bg);">
                 <div class="card-header bg-transparent border-bottom px-4 py-3">
-                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-key me-2 text-warning"></i>Keamanan (Ganti Password)</h5>
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-key me-2 text-warning"></i>Keamanan (Ganti Password)</h5>
                 </div>
                 <div class="card-body p-4">
                     <form id="formPassword">
